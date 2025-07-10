@@ -13,10 +13,14 @@ seen_projects = {}
 
 for mod in data["files"]:
     filename = os.path.basename(mod["path"])
-    if filename.endswith(".disabled"):jar_name = filename[:-9]  
-    else: jar_name = filename
-    if filename.endswith(".disabled"): status = "Disabled" 
-    else: status = "Enabled"
+    if filename.endswith(".disabled"): 
+        jar_name = filename[:-9]  
+    else: 
+        jar_name = filename
+    if filename.endswith(".disabled"): 
+        status = "Disabled" 
+    else: 
+        status = "Enabled"
     mod_name = os.path.splitext(jar_name)[0]
 
     if not mod["downloads"]:
@@ -30,7 +34,6 @@ for mod in data["files"]:
         project_id = None
 
     if project_id:
-        # Cache project names to avoid duplicate API calls
         if project_id not in seen_projects:
             try:
                 resp = requests.get(f"https://api.modrinth.com/v2/project/{project_id}")
@@ -38,7 +41,7 @@ for mod in data["files"]:
                     seen_projects[project_id] = resp.json()["title"]
                 else:
                     seen_projects[project_id] = mod_name
-                time.sleep(0.1)  # be nice to the API
+                time.sleep(0.1)  # be nice to the API, don't want to overwhelm it
             except:
                 seen_projects[project_id] = mod_name
 
@@ -48,10 +51,9 @@ for mod in data["files"]:
         pretty_name = mod_name
         modrinth_link = "N/A"
 
-    print("Parsed" + pretty_name);
+    print("Processed" + pretty_name);
     mod_list.append((pretty_name, status, modrinth_link))
 
-# Write to CSV
 csv_path = "modrinth_mods_pretty.csv"
 with open(csv_path, "w", newline="", encoding="utf-8") as f:
     writer = csv.writer(f)
