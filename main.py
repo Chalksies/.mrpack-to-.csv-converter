@@ -31,10 +31,14 @@ seen_projects = {}
 
 for mod in data["files"]:
     filename = os.path.basename(mod["path"])
-    if filename.endswith(".disabled"):jar_name = filename[:-9]  
-    else: jar_name = filename
-    if filename.endswith(".disabled"): status = "Disabled" 
-    else: status = "Enabled"
+    if filename.endswith(".disabled"): 
+        jar_name = filename[:-9]  
+    else: 
+        jar_name = filename
+    if filename.endswith(".disabled"): 
+        status = "Disabled" 
+    else: 
+        status = "Enabled"
     mod_name = os.path.splitext(jar_name)[0]
 
     if not mod["downloads"]:
@@ -65,7 +69,7 @@ for mod in data["files"]:
         pretty_name = mod_name
         modrinth_link = "N/A"
 
-    print("Parsed" + pretty_name);
+    print("Processed" + pretty_name);
     mod_list.append((pretty_name, status, modrinth_link))
 
 csv_path = "modrinth_modlist.csv"
