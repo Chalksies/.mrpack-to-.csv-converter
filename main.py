@@ -3,13 +3,31 @@ import csv
 import os
 import requests
 import time
+import glob
+import zipfile
 
-index_path = "modrinth.index.json"
-with open(index_path, "r", encoding="utf-8") as f:
-    data = json.load(f)
+try:
+    index_path = "modrinth.index.json"
+    with open(index_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+except FileNotFoundError:
+    print(f"Error: {index_path} not found. Looking for .mrpack file.")
+
+try:
+    mrpack_path = glob.glob("*.mrpack")
+    print(f"Found .mrpack file: {mrpack_path[0]}, continuing.")
+except FileNotFoundError:
+    print("No .mrpack file found. Please ensure you have the modrinth.index.json or a valid .mrpack file in the current directory.")
+    exit(1)
+
+with zipfile.ZipFile(mrpack_path[0], 'r') as mrpack:
+    with mrpack.open("modrinth.index.json") as f:
+        data = json.load(f)
+
 
 mod_list = []
 seen_projects = {}
+
 
 for mod in data["files"]:
     filename = os.path.basename(mod["path"])
@@ -30,7 +48,6 @@ for mod in data["files"]:
         project_id = None
 
     if project_id:
-        # Cache project names to avoid duplicate API calls
         if project_id not in seen_projects:
             try:
                 resp = requests.get(f"https://api.modrinth.com/v2/project/{project_id}")
@@ -38,7 +55,7 @@ for mod in data["files"]:
                     seen_projects[project_id] = resp.json()["title"]
                 else:
                     seen_projects[project_id] = mod_name
-                time.sleep(0.1)  # be nice to the API
+                time.sleep(0.1)  # sleeping to not overwhelm the api
             except:
                 seen_projects[project_id] = mod_name
 
@@ -51,11 +68,12 @@ for mod in data["files"]:
     print("Parsed" + pretty_name);
     mod_list.append((pretty_name, status, modrinth_link))
 
-# Write to CSV
-csv_path = "modrinth_mods_pretty.csv"
+csv_path = "modrinth_modlist.csv"
 with open(csv_path, "w", newline="", encoding="utf-8") as f:
     writer = csv.writer(f)
     writer.writerow(["Mod Name", "Status", "Modrinth Link"])
     writer.writerows(mod_list)
+
+print("Done. CSV file created at:", csv_path)
 
 
