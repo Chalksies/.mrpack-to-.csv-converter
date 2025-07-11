@@ -12,18 +12,15 @@ try:
         data = json.load(f)
 except FileNotFoundError:
     print(f"Error: {index_path} not found. Looking for .mrpack file.")
-
-try:
-    mrpack_path = glob.glob("*.mrpack")
-    print(f"Found .mrpack file: {mrpack_path[0]}, continuing.")
-except FileNotFoundError:
-    print("No .mrpack file found. Please ensure you have the modrinth.index.json or a valid .mrpack file in the current directory.")
-    exit(1)
-
-with zipfile.ZipFile(mrpack_path[0], 'r') as mrpack:
-    with mrpack.open("modrinth.index.json") as f:
-        data = json.load(f)
-
+    try:
+        mrpack_path = glob.glob("*.mrpack")
+        print(f"Found .mrpack file: {mrpack_path[0]}, continuing.")
+        with zipfile.ZipFile(mrpack_path[0], 'r') as mrpack:
+            with mrpack.open("modrinth.index.json") as f:
+                data = json.load(f)
+    except FileNotFoundError:
+        print("No .mrpack file found. Please ensure you have the modrinth.index.json or a valid .mrpack file in the current directory.")
+        exit(1)
 
 mod_list = []
 seen_projects = {}
